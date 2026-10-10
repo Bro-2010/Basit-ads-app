@@ -1,0 +1,61 @@
+/* Timeline, clip sequence and sound library styles (loaded after styles.css) */
+
+[hidden]{display:none !important}
+
+.tl-scroll{overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.tl-inner{position:relative;height:130px;touch-action:none;cursor:pointer}
+.lane{position:absolute;left:0;right:0;height:30px}
+.lane-clips{top:0}
+.lane-sounds{top:33px}
+.lane-ov{top:66px}
+.lane-layers{top:99px}
+.layer-block{position:absolute;top:2px;bottom:2px;background:rgba(45,212,191,.25);border:1px solid #2dd4bf;border-radius:6px;font-size:11px;line-height:24px;padding:0 6px;white-space:nowrap;overflow:hidden;color:#e7ecf6;box-sizing:border-box;cursor:pointer}
+.layer-block.sel{box-shadow:0 0 0 1px #fff}
+
+.clip-block{position:absolute;top:2px;bottom:2px;background:linear-gradient(90deg,#3b2f7a,#23425e);border:1px solid #6d5bd0;border-radius:6px;font-size:11px;line-height:24px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e7ecf6;box-sizing:border-box;cursor:pointer}
+.clip-block.sel{border-color:var(--a2);box-shadow:0 0 0 1px var(--a2)}
+
+.sound-block{position:absolute;top:2px;bottom:2px;background:rgba(251,146,60,.35);border:1px solid #fb923c;border-radius:6px;font-size:11px;line-height:24px;padding:0 6px;white-space:nowrap;overflow:hidden;color:#fff;box-sizing:border-box;pointer-events:none}
+
+.lane-ov .ov-bar{top:4px;bottom:auto}
+
+#trimZone{z-index:1}
+#ecBar{z-index:2}
+#playhead{z-index:3}
+
+.clip-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:12px;cursor:pointer}
+.clip-item:hover{border-color:var(--a1)}
+.clip-item.sel{border-color:var(--a2);background:#0f2f33}
+.ci-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ci-l{color:var(--muted);flex:none}
+
+.clip-editor{display:flex;flex-direction:column;gap:8px;padding:8px;border:1px solid var(--line);border-radius:8px}
+
+.lib-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.lib-row b{font-weight:600;font-size:13px;display:block}
+.lib-row span{font-size:11px;color:var(--muted)}
+.lib-row button{padding:4px 9px;flex:none}
+
+.snd-row{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.snd-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}
+.snd-head b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.snd-head button.x{color:var(--danger);padding:2px 8px;flex:none}
+.snd-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;color:var(--muted);align-items:end}
+.snd-grid label{display:flex;flex-direction:column;gap:3px}
+.snd-grid .chk{flex-direction:row;align-items:center}
+.snd-grid .chk input{width:auto}
+
+#zoom{width:110px}
+#zoomVal{min-width:70px}
+
+/* Upload boxes: the real file input covers the whole box, so clicking anywhere opens the picker. */
+.upload{position:relative;overflow:hidden}
+.upload input{display:block !important;position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+
+/* Start panel on the stage */
+.empty-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px;background:rgba(10,14,22,.86);z-index:2}
+.empty-state h2{margin:0;font-size:24px}
+.empty-state p{margin:0;color:var(--muted);max-width:420px;font-size:14px;line-height:1.5}
+.empty-btns{display:flex;flex-direction:column;gap:10px;width:min(320px,90%)}
+.big-btn{padding:14px;font-size:16px;font-weight:700;border-radius:12px;text-align:center;width:100%}
+.big-btn.primary-big{background:linear-gradient(90deg,var(--a1),var(--a2));border:none;color:#fff}

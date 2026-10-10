@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Basit Ads – Pro Video Ad Editor</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#0a0e16" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Basit Ads" />
+<meta name="description" content="Make promo and short video ads in your browser. Works offline." />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="editor.css" />
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="avG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c5cff"/>
+      <stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <symbol id="avatar" viewBox="0 0 64 64">
+      <rect width="64" height="64" fill="url(#avG)"/>
+      <circle cx="32" cy="24" r="11" fill="#0a0e16"/>
+      <path d="M12 62c2-13 10-19 20-19s18 6 20 19z" fill="#0a0e16"/>
+      <circle cx="50" cy="12" r="3" fill="#ffd166"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="brand">Basit Ads <small>PRO VIDEO AD EDITOR</small></div>
+  <div class="tools">
+    <button id="undoBtn" title="Undo last overlay change (Ctrl+Z)">↶ Undo</button>
+    <button id="snapBtn" title="Save the current frame as PNG">📷 Frame</button>
+    <button id="saveProjBtn" title="Download your project settings as JSON">💾 Save project</button>
+    <label class="btn-like" title="Open a saved project file">📂 Open project
+      <input type="file" id="openProjInput" accept=".json,application/json" hidden />
+    </label>
+    <button id="installBtn" title="Install Basit Ads on this device" hidden>📲 Install app</button>
+    <button id="shareBtn" title="Share Basit Ads with friends">🔗 Share</button>
+    <button id="helpBtn" title="Keyboard shortcuts">⌨ Shortcuts</button>
+  </div>
+  <button class="founder-badge" id="founderBtn" title="About the founder">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><use href="#avatar"/></svg>
+    <div>
+      <div class="fb-name">Shaibu Abdul Basit</div>
+      <div class="fb-role">CEO &amp; Web Developer · Bright Vision Digital Design</div>
+      <div class="fb-motto">"Dream, Build, Grow, Future"</div>
+    </div>
+  </button>
+</header>
+
+<div class="app">
+  <aside>
+    <details open>
+      <summary>Clips</summary>
+      <div class="body">
+        <label class="upload">＋ Add video clips (MP4, WebM, MOV)
+          <input type="file" id="clipFileInput" accept="video/*" multiple />
+        </label>
+        <label class="upload">＋ Add images or flyers (JPG, PNG, WebP) — select many
+          <input type="file" id="imgFileInput" accept="image/*" multiple />
+        </label>
+        <div class="sub">Add a sample clip</div>
+        <div id="samples" class="body" style="padding:0"></div>
+        <div class="sub">Sequence</div>
+        <div id="clipList" class="body" style="padding:0"></div>
+        <div id="clipEditor" class="clip-editor" hidden>
+          <div class="row">
+            <button id="clipUp" class="ghost">▲ Move up</button>
+            <button id="clipDown" class="ghost">▼ Move down</button>
+          </div>
+          <div class="row">
+            <label class="field">Clip in (s)<input type="number" id="clipIn" min="0" step="0.1" /></label>
+            <label class="field">Clip out (s)<input type="number" id="clipOut" min="0" step="0.1" /></label>
+          </div>
+          <div class="row" id="imgRow" hidden>
+            <label class="field">Image length (s)<input type="number" id="imgLen" min="0.5" max="60" step="0.5" /></label>
+            <button id="imgLenAll" class="ghost" title="Use this length for every image">All images</button>
+          </div>
+          <div class="row">
+            <button id="clipSplit">✂ Split at playhead (S)</button>
+            <button id="clipDelete" class="ghost">🗑 Remove</button>
+          </div>
+        </div>
+        <label class="field">Clip volume<input type="range" id="videoVolR" min="0" max="1" step="0.01" value="1" /></label>
+        <p class="hint">Clips play one after another. Long videos are fine: the file stays on your device and streams from disk.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Format</summary>
+      <div class="body">
+        <div class="row">
+          <button data-aspect="9:16">9:16</button>
+          <button data-aspect="16:9">16:9</button>
+        </div>
+        <div class="row">
+          <button data-aspect="1:1">1:1</button>
+          <button data-aspect="4:5">4:5</button>
+        </div>
+        <p class="hint" id="aspectHint"></p>
+        <label class="field">Fit mode
+          <select id="fitSel">
+            <option value="fit">Fit (blurred backdrop)</option>
+            <option value="fill">Fill (crop to frame)</option>
+          </select>
+        </label>
+        <label class="chk"><input type="checkbox" id="chkSafe" /> Show safe-zone guide</label>
+        <label class="chk"><input type="checkbox" id="chkThirds" /> Show rule-of-thirds grid</label>
+        <p class="hint">Guides are for editing only and never appear in exports.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Look &amp; color</summary>
+      <div class="body">
+        <label class="field">Preset filter
+          <select id="filterSel">
+            <option value="none">None</option>
+            <option value="vivid">Vivid</option>
+            <option value="punch">Punch</option>
+            <option value="warm">Warm</option>
+            <option value="cool">Cool</option>
+            <option value="vintage">Vintage</option>
+            <option value="bw">Black &amp; White</option>
+          </select>
+        </label>
+        <label class="field">Brightness<input type="range" id="brightR" min="0.5" max="1.5" step="0.01" value="1" /></label>
+        <label class="field">Contrast<input type="range" id="contrastR" min="0.5" max="1.5" step="0.01" value="1" /></label>
+        <label class="field">Saturation<input type="range" id="satR" min="0" max="2" step="0.01" value="1" /></label>
+        <button id="resetLook" class="ghost">Reset look</button>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Sound library</summary>
+      <div class="body">
+        <input type="text" id="libSearch" placeholder="Search: whoosh, beat, rain, cash…" />
+        <select id="libCat">
+          <option value="all">All sounds</option>
+          <option value="sfx">Sound effects</option>
+          <option value="loop">Loops and beats</option>
+          <option value="ambient">Ambient</option>
+          <option value="mine">My uploads</option>
+        </select>
+        <div id="libList" class="body" style="padding:0"></div>
+        <label class="upload">＋ Upload your own sound (MP3, WAV, M4A)
+          <input type="file" id="soundUpload" accept="audio/*" />
+        </label>
+        <p class="hint">Built-in sounds are generated in your browser, so they work offline and carry no licence. To use a bigger catalogue, download free sounds from a site you trust and upload them here.</p>
+        <div class="sub">On the sound track</div>
+        <div id="soundList" class="body" style="padding:0"></div>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Image &amp; video overlays</summary>
+      <div class="body">
+        <label class="upload">＋ Add image overlay (logo, product, stamp)
+          <input type="file" id="layerImgInput" accept="image/*" multiple />
+        </label>
+        <label class="upload">＋ Add video overlay (plays muted on top)
+          <input type="file" id="layerVidInput" accept="video/*" multiple />
+        </label>
+        <div id="layerList" class="body" style="padding:0"></div>
+        <div id="layerEditor" class="clip-editor" hidden>
+          <div class="sub">Position</div>
+          <div class="row">
+            <button data-lypos="tl" class="ghost" title="Top left">↖</button>
+            <button data-lypos="tr" class="ghost" title="Top right">↗</button>
+          </div>
+          <div class="row">
+            <button data-lypos="c" class="ghost" title="Centre">●</button>
+            <button data-lypos="bc" class="ghost" title="Bottom centre">▼</button>
+          </div>
+          <div class="row">
+            <button data-lypos="bl" class="ghost" title="Bottom left">↙</button>
+            <button data-lypos="br" class="ghost" title="Bottom right">↘</button>
+          </div>
+          <div class="row">
+            <label class="field">Start (s)<input type="number" id="lyStart" min="0" step="0.1" /></label>
+            <label class="field">End (s)<input type="number" id="lyEnd" min="0" step="0.1" /></label>
+          </div>
+          <div class="row">
+            <label class="field">Centre X (%)<input type="number" id="lyX" min="0" max="100" step="1" /></label>
+            <label class="field">Centre Y (%)<input type="number" id="lyY" min="0" max="100" step="1" /></label>
+          </div>
+          <label class="field">Width (% of frame)<input type="range" id="lyW" min="2" max="100" step="1" /></label>
+          <label class="field">Opacity<input type="range" id="lyOp" min="0" max="1" step="0.05" /></label>
+          <label class="chk" id="lyLoopRow"><input type="checkbox" id="lyLoop" /> Loop video overlay</label>
+          <button id="lyDel" class="ghost">🗑 Remove overlay</button>
+        </div>
+        <p class="hint">Overlays sit above the sequence and are included in the export. Video overlays play muted.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Text overlays</summary>
+      <div class="body">
+        <select id="ovTemplate" title="Quick text templates">
+          <option value="">Quick text templates…</option>
+          <option value="50% OFF">50% OFF</option>
+          <option value="Limited time offer">Limited time offer</option>
+          <option value="Free delivery">Free delivery</option>
+          <option value="New arrival">New arrival</option>
+          <option value="Shop now →">Shop now →</option>
+          <option value="Link in bio">Link in bio</option>
+        </select>
+        <input type="text" id="ovText" placeholder="Overlay text" maxlength="120" />
+        <div class="row">
+          <label class="field">Start (s)<input type="number" id="ovStart" value="0" min="0" step="0.1" /></label>
+          <label class="field">End (s)<input type="number" id="ovEnd" value="3" min="0" step="0.1" /></label>
+        </div>
+        <div class="row">
+          <label class="field">Vertical
+            <select id="ovPos">
+              <option value="top">Top</option>
+              <option value="center" selected>Center</option>
+              <option value="bottom">Bottom</option>
+            </select>
+          </label>
+          <label class="field">Align
+            <select id="ovAlign">
+              <option value="left">Left</option>
+              <option value="center" selected>Center</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">Font
+            <select id="ovFont">
+              <option value="sans">Sans</option>
+              <option value="impact">Impact</option>
+              <option value="serif">Serif</option>
+              <option value="mono">Mono</option>
+            </select>
+          </label>
+          <label class="field">Animation
+            <select id="ovAnim">
+              <option value="fade">Fade</option>
+              <option value="slide">Slide up</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+        </div>
+        <label class="field">Size<input type="range" id="ovSize" min="2" max="12" step="0.5" value="6" /></label>
+        <div class="row">
+          <input type="color" id="ovColor" value="#ffffff" title="Text color" />
+          <label class="chk"><input type="checkbox" id="ovBg" checked /> Backdrop box</label>
+        </div>
+        <button id="addOverlay" class="primary">Add overlay</button>
+        <div id="ovList" class="body" style="padding:0"></div>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Images &amp; transitions</summary>
+      <div class="body">
+        <label class="field">Default image length (s)<input type="number" id="imgDur" min="0.5" max="60" step="0.5" value="3" /></label>
+        <label class="field">Crossfade between clips (s)<input type="range" id="xfade" min="0" max="2" step="0.1" value="0.5" /></label>
+        <label class="chk"><input type="checkbox" id="kenBurns" checked /> Slow zoom on images (Ken Burns)</label>
+        <p class="hint">Images and flyers become slides. Set each image's length in Clips, or use All images.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Logo watermark</summary>
+      <div class="body">
+        <label class="upload">＋ Upload logo (PNG or JPG)
+          <input type="file" id="logoInput" accept="image/*" />
+        </label>
+        <div class="row">
+          <span id="logoName" class="hint">No logo added</span>
+          <button id="logoClear" class="ghost" hidden>Remove</button>
+        </div>
+        <label class="field">Position
+          <select id="logoPos">
+            <option value="tl">Top left</option>
+            <option value="tr">Top right</option>
+            <option value="bl">Bottom left</option>
+            <option value="br">Bottom right</option>
+            <option value="c">Center</option>
+          </select>
+        </label>
+        <label class="field">Width (% of frame)<input type="range" id="logoWidth" min="5" max="50" step="1" value="18" /></label>
+        <label class="field">Opacity<input type="range" id="logoOpacity" min="0.1" max="1" step="0.05" value="0.9" /></label>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Fades</summary>
+      <div class="body">
+        <div class="row">
+          <label class="field">Fade from black (s)<input type="number" id="fadeIn" min="0" max="5" step="0.1" value="0" /></label>
+          <label class="field">Fade to black (s)<input type="number" id="fadeOut" min="0" max="5" step="0.1" value="0" /></label>
+        </div>
+        <p class="hint">Fades apply to the picture and the clip audio across the In → Out range.</p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>End card</summary>
+      <div class="body">
+        <label class="chk"><input type="checkbox" id="ecOn" /> Add end card</label>
+        <label class="field">Duration (s)<input type="number" id="ecDur" min="1" max="10" step="0.5" value="3" /></label>
+        <label class="field">Headline<input type="text" id="ecHead" maxlength="60" /></label>
+        <label class="field">Supporting line<input type="text" id="ecSub" maxlength="90" /></label>
+        <label class="field">Call to action<input type="text" id="ecCta" maxlength="24" /></label>
+        <label class="field">Website or handle<input type="text" id="ecUrl" maxlength="50" /></label>
+        <label class="field">Brand color<input type="color" id="ecColor" value="#7c5cff" /></label>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Export</summary>
+      <div class="body">
+        <label class="field">Quality
+          <select id="qualitySel">
+            <option value="draft">Draft (small file)</option>
+            <option value="standard" selected>Standard</option>
+            <option value="high">High (large file)</option>
+          </select>
+        </label>
+        <label class="field">Frame rate
+          <select id="fpsSel">
+            <option value="24">24 fps (film)</option>
+            <option value="30" selected>30 fps (standard)</option>
+            <option value="60">60 fps (smooth)</option>
+          </select>
+        </label>
+        <button class="primary export-trigger">⬇ Export ad</button>
+        <p class="hint">Exports the In → Out range of the whole sequence with clip audio and sounds. Keep the tab open while it records. WebM works in Chrome, Edge and Firefox.</p>
+      </div>
+    </details>
+  </aside>
+
+  <main>
+    <div id="stage">
+      <div id="frameWrap">
+        <canvas id="canvas" width="720" height="1280"></canvas>
+        <div id="guideSafeBox" class="guide-safe" hidden></div>
+        <div id="guideThirdsBox" class="guide-thirds" hidden></div>
+      </div>
+      <div id="emptyState" class="empty-state">
+        <h2>Start your ad</h2>
+        <p>Add videos or your flyers, then edit them. Everything stays on your computer and nothing is uploaded anywhere.</p>
+        <div class="empty-btns">
+          <button id="emptyAddVid" class="big-btn primary-big">🎬 Add videos</button>
+          <button id="emptyAddImg" class="big-btn">🖼 Add images or flyers</button>
+          <button id="emptySample" class="big-btn">✨ Try a sample</button>
+        </div>
+      </div>
+      <div id="srcName" class="src-label">No clips yet</div>
+    </div>
+
+    <section id="timeline">
+      <div class="tl-top">
+        <button id="playBtn" title="Play / pause (Space)">▶</button>
+        <span id="timecode">0:00.0 / 0:00.0</span>
+        <label class="chk"><input type="checkbox" id="loopChk" checked /> Loop</label>
+        <span class="spacer"></span>
+        <button id="setIn" title="Set In point (I)">Set In</button>
+        <button id="setOut" title="Set Out point (O)">Set Out</button>
+        <button id="resetTrim">Reset range</button>
+        <button id="fitBtn" title="Fit the whole sequence on screen">Fit</button>
+        <label class="chk">Zoom <input type="range" id="zoom" min="5" max="200" step="1" value="40" /></label>
+        <span id="zoomVal" class="hint"></span>
+        <button class="primary export-trigger">⬇ Export</button>
+      </div>
+      <div class="tl-scroll" id="tlScroll">
+        <div class="tl-inner" id="tlInner">
+          <div class="lane lane-clips" id="clipLane"></div>
+          <div class="lane lane-sounds" id="soundLane"></div>
+          <div class="lane lane-ov" id="ovLane"></div>
+          <div class="lane lane-layers" id="layerLane"></div>
+          <div id="trimZone"></div>
+          <div id="ecBar" hidden></div>
+          <div id="playhead"></div>
+        </div>
+      </div>
+      <div class="trim-row">
+        <span>In</span><input type="range" id="inR" min="0" max="1" step="0.05" value="0" />
+        <span>Out</span><input type="range" id="outR" min="0" max="1" step="0.05" value="1" />
+      </div>
+      <div class="tl-bottom">
+        <div id="trimInfo" class="hint">Add a clip to begin.</div>
+        <div id="checks" class="checks"></div>
+      </div>
+      <div class="exp-progress" id="expWrap" hidden><div id="expBar"></div></div>
+    </section>
+  </main>
+</div>
+
+<div id="mediaHost"></div>
+
+<div id="exportBox" hidden>
+  <div class="card">
+    <div><span class="rec-dot"></span><b>Recording…</b></div>
+    <p class="hint">Keep this tab open and visible until the export finishes.</p>
+    <button id="stopExport" class="primary">Stop &amp; save</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<dialog id="founderModal" aria-labelledby="fTitle">
+  <div class="fm">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><use href="#avatar"/></svg>
+    <h2 id="fTitle">Shaibu Abdul Basit</h2>
+    <div class="role">CEO &amp; Web Developer</div>
+    <div class="co">Bright Vision Digital Design · also known as Abdul Basit</div>
+    <blockquote>"Dream, Build, Grow, Future"</blockquote>
+    <p class="bio">Founder of Bright Vision Digital Design and creator of Basit Ads, a browser-based editor for promo and short-form video ads.</p>
+  </div>
+  <footer><button id="closeFounder" class="primary">Close</button></footer>
+</dialog>
+
+<dialog id="helpModal" aria-labelledby="hTitle">
+  <div class="fm">
+    <h2 id="hTitle">Keyboard shortcuts</h2>
+    <div class="keys">
+      <kbd>Space</kbd><span>Play / pause</span>
+      <kbd>←</kbd><span>Back 0.5 seconds</span>
+      <kbd>→</kbd><span>Forward 0.5 seconds</span>
+      <kbd>Shift + ← / →</kbd><span>Jump 1 second</span>
+      <kbd>I</kbd><span>Set In point</span>
+      <kbd>O</kbd><span>Set Out point</span>
+      <kbd>S</kbd><span>Split selected clip at playhead</span>
+      <kbd>Ctrl + Z</kbd><span>Undo overlay change</span>
+      <kbd>?</kbd><span>Open this list</span>
+    </div>
+  </div>
+  <footer><button id="closeHelp" class="primary">Close</button></footer>
+</dialog>
+
+<script src="scenes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
